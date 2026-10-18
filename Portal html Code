@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AlumniConnect Portal</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="brand" data-page="home"><span class="brand-mark">AC</span>Alumni<span>Connect</span></button>
+    <nav id="nav" class="nav" aria-label="Main navigation"></nav>
+    <div id="account"></div>
+  </header>
+
+  <main class="container">
+    <div id="notice" class="notice hidden" role="status"></div>
+    <div id="app"></div>
+  </main>
+
+  <footer>© 2026 AlumniConnect · Your community, connected.</footer>
+  <script src="app.js"></script>
+</body>
+</html>

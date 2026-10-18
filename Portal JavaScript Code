@@ -1,0 +1,67 @@
+const alumni = [
+  ['Jordan Davis','Product Designer','Northstar','Design','2020','Bengaluru','UX Research, Figma, Mentorship'],
+  ['Maya Patel','Data Analyst','Vertex Labs','Computer Science','2021','Mumbai','SQL, Python, Tableau'],
+  ['Rahul Mehta','Software Engineer','Cloudline','Engineering','2019','Pune','React, Node.js, AWS']
+];
+const jobs = [
+  ['Frontend Developer Intern','Northstar','Internship','Remote','Work with a collaborative product team to build thoughtful web experiences.'],
+  ['Data Analyst','Vertex Labs','Full-time','Mumbai','Turn data into practical insights for a growing technology team.'],
+  ['Graduate Software Engineer','Cloudline','Full-time','Bengaluru','Build reliable cloud services with a supportive engineering community.']
+];
+const events = [
+  ['NOV 12 · 6:30 PM','Alumni Networking Evening','Community Hall, Bengaluru','Reconnect with classmates and meet alumni across industries.'],
+  ['DEC 03 · 5:00 PM','Career Stories: Building in Tech','Online','An honest conversation with alumni working in technology.'],
+  ['JAN 18 · 10:00 AM','Mentorship Meet-up','Innovation Centre','Find a mentor, share your experience, and grow together.']
+];
+
+let page = 'home';
+let query = '';
+let user = JSON.parse(localStorage.getItem('alumni_connect_user') || 'null');
+const $ = (selector) => document.querySelector(selector);
+const initials = (name) => name.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase();
+
+function flash(text) {
+  const notice = $('#notice');
+  notice.textContent = text;
+  notice.classList.remove('hidden');
+  setTimeout(() => notice.classList.add('hidden'), 3200);
+}
+function go(nextPage) { page = nextPage; render(); }
+function navigation() {
+  const links = [['home', 'Overview'], ['directory', 'Directory'], ['jobs', 'Careers'], ['events', 'Events']];
+  if (user) links.push(['dashboard', 'Dashboard']);
+  return links.map(([key, label]) => `<button class="${page === key ? 'active' : ''}" onclick="go('${key}')">${label}</button>`).join('');
+}
+function updateHeader() {
+  $('#nav').innerHTML = navigation();
+  $('#account').innerHTML = user
+    ? `<span style="font-size:12px;color:#64747d;margin-right:10px">Hi, ${user.name.split(' ')[0]}</span><button class="btn secondary small" onclick="logout()">Log out</button>`
+    : '<button class="btn primary small" onclick="go(\'auth\')">Sign in</button>';
+}
+function home() {
+  return `<section class="hero"><div><span class="eyebrow">● YOUR COMMUNITY, CONNECTED</span><h1>Great connections.<br><span>Lasting impact.</span></h1><p class="lead">Reconnect with classmates, discover career opportunities, and stay part of the community that helped shape your future.</p><div class="row"><button class="btn primary" onclick="go('directory')">Explore alumni ↗</button><button class="btn secondary" onclick="go('auth')">Join the community</button></div></div><div class="art"><div class="orbit"></div><div class="spotlight"><span class="eyebrow">ALUMNI SPOTLIGHT</span><div class="avatar">JD</div><h3>Jordan Davis</h3><p>Product Designer · Class of 2020</p><span class="tag">Design & Mentorship</span></div><div class="note a">✦ <b>New opportunity</b><br>Product Design Intern</div><div class="note b">✓ <b>Stay in the loop</b><br>Community updates</div></div></section><section class="stats"><div class="stat"><b>3+</b><span>Verified alumni</span></div><div class="stat"><b>3+</b><span>Open opportunities</span></div><div class="stat"><b>3+</b><span>Upcoming events</span></div></section><section class="section"><div class="head"><div><span class="eyebrow">FIND YOUR NEXT STEP</span><h2>A network that moves you forward.</h2></div></div><div class="grid"><article class="card feature"><b>◎</b><h3>People who get you</h3><p>Find alumni by graduation year, skills, or company and grow your professional circle.</p><button class="link" onclick="go('directory')">Explore directory →</button></article><article class="card feature"><b>↗</b><h3>Your next opportunity</h3><p>Discover jobs and internships shared by a community that wants to see you succeed.</p><button class="link" onclick="go('jobs')">Browse careers →</button></article><article class="card feature"><b>▦</b><h3>Keep the connection</h3><p>Meet up, learn from each other, and stay connected through alumni events.</p><button class="link" onclick="go('events')">See events →</button></article></div></section>`;
+}
+function search(placeholder) { return `<div class="search">⌕<input autofocus placeholder="${placeholder}" value="${query}" oninput="query=this.value;render()"></div>`; }
+function directory() {
+  const filtered = alumni.filter((person) => person.join(' ').toLowerCase().includes(query.toLowerCase()));
+  return `<section class="title"><span class="eyebrow">YOUR PEOPLE, YOUR NETWORK</span><h1>Alumni directory</h1><p>Find the people, experience, and inspiration you need for your next step.</p></section>${search('Search by name, department, company, or skill…')}<p class="eyebrow">${filtered.length} VERIFIED PROFILES</p><div class="grid">${filtered.map((person) => `<article class="card"><div class="person-head"><div class="mini">${initials(person[0])}</div><span class="verified">✓ Verified</span></div><h3>${person[0]}</h3><p style="color:#4b8494">${person[1]} · ${person[2]}</p><p>${person[3]} · Class of ${person[4]}<br>⌖ ${person[5]}</p><div class="skills">${person[6].split(', ').map((skill) => `<span>${skill}</span>`).join('')}</div></article>`).join('') || '<p>No alumni profiles match your search.</p>'}</div>`;
+}
+function careers() {
+  const filtered = jobs.filter((job) => job.join(' ').toLowerCase().includes(query.toLowerCase()));
+  return `<section class="title"><span class="eyebrow">CAREERS & OPPORTUNITIES</span><h1>Make your next move.</h1><p>Explore roles and internships shared by the alumni community.</p></section>${search('Search title, company, or location…')}<div class="jobs">${filtered.map((job) => `<article class="card job"><div class="logo">${job[1][0]}</div><div><div class="job-head"><h3>${job[0]}</h3><span class="pill">${job[2]}</span></div><p style="color:#4b8494">${job[1]} · ${job[3]}</p><p>${job[4]}</p><button class="link" onclick="${user ? "flash('Application link would open here.')" : "go('auth')"}">${user ? 'View opportunity ↗' : 'Sign in to view opportunity →'}</button></div></article>`).join('')}</div>`;
+}
+function eventPage() {
+  return `<section class="title"><span class="eyebrow">STAY CONNECTED</span><h1>Community events</h1><p>Meet, learn, and celebrate with the alumni community.</p></section><div class="grid">${events.map((event) => `<article class="card"><div class="event-date">${event[0]}</div><h3>${event[1]}</h3><p>${event[3]}</p><p>⌖ ${event[2]}</p><button class="link" onclick="flash('Event interest has been recorded.')">I’m interested →</button></article>`).join('')}</div>`;
+}
+function auth() {
+  return `<section class="card form"><span class="eyebrow">WELCOME TO ALUMNI CONNECT</span><h2>Join your community.</h2><p>Create a local demo account to explore the portal.</p><form onsubmit="login(event)"><label>Full name<input required name="name" placeholder="e.g. Alex Morgan"></label><label>Email address<input required type="email" name="email" placeholder="you@example.com"></label><label>Account type<select name="role"><option>Alumni</option><option>Student</option></select></label><button class="btn primary" style="width:100%;margin-top:8px">Create account / sign in</button></form></section>`;
+}
+function login(event) { event.preventDefault(); const data = new FormData(event.target); user = { name: data.get('name'), email: data.get('email'), role: data.get('role') }; localStorage.setItem('alumni_connect_user', JSON.stringify(user)); flash('Welcome to AlumniConnect!'); go('dashboard'); }
+function logout() { localStorage.removeItem('alumni_connect_user'); user = null; flash('You have been logged out.'); go('home'); }
+function dashboard() {
+  return `<section class="title"><span class="eyebrow">YOUR DASHBOARD</span><h1>Welcome, ${user.name.split(' ')[0]}.</h1></section><section class="dashboard"><div class="card"><h2>Your profile</h2><p>Update your profile so fellow alumni and students can find you.</p><form onsubmit="saveProfile(event)"><label>Professional headline<input placeholder="e.g. Product Designer at Northstar"></label><label>Location<input placeholder="Your city"></label><label>Skills<textarea rows="3" placeholder="e.g. Design, React, Mentorship"></textarea></label><button class="btn primary">Save profile</button></form></div><aside class="card"><span class="eyebrow">QUICK LINKS</span><h3>Keep exploring</h3><p><button class="link" onclick="go('directory')">Browse the directory →</button></p><p><button class="link" onclick="go('jobs')">Explore careers →</button></p><p><button class="link" onclick="go('events')">See upcoming events →</button></p></aside></section>`;
+}
+function saveProfile(event) { event.preventDefault(); flash('Your profile has been saved in this browser.'); }
+function render() { query = ''; updateHeader(); $('#app').innerHTML = ({ home, directory, jobs: careers, events: eventPage, auth, dashboard }[page] || home)(); }
+document.querySelector('.brand').addEventListener('click', () => go('home'));
+render();
